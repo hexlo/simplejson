@@ -123,8 +123,8 @@ def run_setup(with_binary):
         platforms=['any'],
         **kw)
 
-
-DISABLE_SPEEDUPS = IS_PYPY or os.environ.get('DISABLE_SPEEDUPS') == '1'
+# Disable C lib speedups to enable proper coverage
+DISABLE_SPEEDUPS = True # IS_PYPY or os.environ.get('DISABLE_SPEEDUPS') == '1'
 CIBUILDWHEEL = os.environ.get('CIBUILDWHEEL') == '1'
 REQUIRE_SPEEDUPS = CIBUILDWHEEL or os.environ.get('REQUIRE_SPEEDUPS') == '1'
 try:
