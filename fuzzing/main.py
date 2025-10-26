@@ -10,10 +10,11 @@ from CoverageMutationFuzzer import CoverageMutationFuzzer
 from GrammarFuzzer import GrammarFuzzer
 from analytics import analyze_all
 
-NUM_TRIALS = 10
+NUM_TRIALS = 150
 
 # TODO: Votre matricule
-RANDOM_SEED = 123456789
+# RANDOM_SEED = 123456789
+RANDOM_SEED = 1896074
 
 MAX_DUPLICATES = 5
 
@@ -70,8 +71,8 @@ def part4():
 
     # TODO: Choose which fuzzers to use
     return {
-        "Random Fuzzer": random_fuzzer.runs(runner, NUM_TRIALS),
-        "Mutation Fuzzer": mutation_fuzzer.runs(runner, NUM_TRIALS),
+        # "Random Fuzzer": random_fuzzer.runs(runner, NUM_TRIALS),
+        # "Mutation Fuzzer": mutation_fuzzer.runs(runner, NUM_TRIALS),
         "Coverage Mutation Fuzzer": coverage_mutation_fuzzer.runs(runner, NUM_TRIALS),
         "Grammar Fuzzer": grammar_fuzzer.runs(runner, NUM_TRIALS)
     }
@@ -95,7 +96,32 @@ def produce_testcases(runs: list[JsonParserExecution]) -> dict[FrozenSet[Locatio
 def filter_testcases(data: dict[str, list[JsonParserExecution]]) -> list[JsonParserExecution]:
     """Select the most interesting test cases from the data dictionary, avoiding duplicate or redundant inputs."""
     # TODO: Implement test case selection
-    return []
+    all_executions: list[JsonParserExecution] = []
+
+    for fuzzer_name, runs in data.items():
+        all_executions.extend(runs)
+
+    # Keep only unique inputs
+    unique_by_input = {}
+    for exec in all_executions:
+        if exec.inp not in unique_by_input:
+            unique_by_input[exec.inp] = exec
+
+    unique_executions = list(unique_by_input.values())
+
+    # Within the unique inputs, keep only the ones that cover new lines
+    selected_tests = []
+    seen_coverage: set[Location] = set()
+
+    for exec in unique_executions:
+        cov = set(exec.cov.coverage())
+        new_lines = cov - seen_coverage
+        if new_lines:
+            selected_tests.append(exec)
+            seen_coverage |= cov
+
+    return selected_tests
+
 
 
 def stringify_testcase(execution: JsonParserExecution) -> str:
@@ -119,10 +145,10 @@ def show_testcases_by_fuzzer(data: dict[str, list[JsonParserExecution]]):
 if __name__ == "__main__":
     random.seed(RANDOM_SEED)
 
-    data = part1()
+    # data = part1()
     # data = part2()
     # data = part3()
-    # data = part4()
+    data = part4()
 
     print("Generating analytics...")
     analyze_all(data)

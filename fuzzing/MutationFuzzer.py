@@ -1,4 +1,5 @@
 import random
+import string
 
 from BaseFuzzer import BaseFuzzer
 
@@ -42,16 +43,33 @@ class MutationFuzzer(BaseFuzzer):
     def mutate(self, inp: str) -> str:
         """Apply a random mutation to the JSON input string"""
 
-        # TODO: Add your mutations here
         mutators = [
-            self.example_mutation,
-            # ...
+            self.add_char_end_mutation,
+            self.add_random_char_mutation,
+            self.remove_random_char_mutation
         ]
 
         mutator = random.choice(mutators)
         return mutator(inp)
 
-    # TODO: Delete and create your own
-    def example_mutation(self, inp: str) -> str:
-        """Example of mutation definition"""
-        return inp + "a"
+    def add_char_end_mutation(self, inp: str) -> str:
+        """Adds a random character to the end of the input"""
+        return inp.join([random.choice(string.printable)])
+
+    def add_random_char_mutation(self, inp: str) -> str:
+        """Adds a random character to the input"""
+        index = random.randint(0, len(inp))
+        return inp[:index] + random.choice(string.printable) + inp[index:]
+
+    def remove_random_char_mutation(self, inp: str) -> str:
+        """Removes a random character of the input"""
+        if len(inp) >= 1:
+            index = random.randint(0, len(inp) - 1)
+            return inp[:index] + inp[index + 1:]
+        else:
+            return inp
+
+
+
+
+
